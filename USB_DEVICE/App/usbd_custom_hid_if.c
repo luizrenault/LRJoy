@@ -92,41 +92,68 @@
 __ALIGN_BEGIN static uint8_t CUSTOM_HID_ReportDesc_FS[USBD_CUSTOM_HID_REPORT_DESC_SIZE] __ALIGN_END =
 {
   /* USER CODE BEGIN 0 */
-	    0x05, 0x01,                    // USAGE_PAGE (Generic Desktop)
-	    0x09, 0x04,                    // USAGE (Joystick)
-	    0xa1, 0x01,                    // COLLECTION (Application)
-	    0xa1, 0x00,                    //   COLLECTION (Physical)
-	    0x09, 0x36,                    //     USAGE (Slider)
-	    0x15, 0x00,                    //     LOGICAL_MINIMUM (0)
-	    0x26, 0xff, 0x0f,              //     LOGICAL_MAXIMUM (4095)
-	    0x35, 0x00,                    //     PHYSICAL_MINIMUM (0)
-	    0x46, 0xff, 0x0f,              //     PHYSICAL_MAXIMUM (4095)
-	    0x75, 0x0c,                    //     REPORT_SIZE (12)
-	    0x95, 0x01,                    //     REPORT_COUNT (1)
-	    0x81, 0x02,                    //     INPUT (Data,Var,Abs)
-	    0x75, 0x04,                    //     REPORT_SIZE (4)
-	    0x81, 0x01,                    //     INPUT (Cnst,Ary,Abs)
-	    0x09, 0x36,                    //     USAGE (Slider)
-	    0x75, 0x0c,                    //     REPORT_SIZE (12)
-	    0x81, 0x02,                    //     INPUT (Data,Var,Abs)
-	    0x75, 0x04,                    //     REPORT_SIZE (4)
-	    0x81, 0x01,                    //     INPUT (Cnst,Ary,Abs)
-	    0x09, 0x36,                    //     USAGE (Slider)
-	    0x75, 0x0c,                    //     REPORT_SIZE (12)
-	    0x81, 0x02,                    //     INPUT (Data,Var,Abs)
-	    0x75, 0x04,                    //     REPORT_SIZE (4)
-	    0x81, 0x01,                    //     INPUT (Cnst,Ary,Abs)
-	    0xc0,                          //   END_COLLECTION
-	    0x05, 0x09,                    //   USAGE_PAGE (Button)
-	    0x15, 0x00,                    //   LOGICAL_MINIMUM (0)
-	    0x25, 0x01,                    //   LOGICAL_MAXIMUM (1)
-	    0x35, 0x00,                    //   PHYSICAL_MINIMUM (0)
-	    0x45, 0x01,                    //   PHYSICAL_MAXIMUM (1)
-	    0x19, 0x01,                    //   USAGE_MINIMUM (Button 1)
-	    0x29, 0x28,                    //   USAGE_MAXIMUM (Button 40)
-	    0x75, 0x01,                    //   REPORT_SIZE (1)
-	    0x95, 0x28,                    //   REPORT_COUNT (40)
-	    0x81, 0x02,                    //   INPUT (Data,Var,Abs)
+
+		//T-RUDDER HID REPORT DESCRIPTOR OBTIDO DO USBLYZER
+		0x05, 0x01,
+		0x09, 0x04,
+		0xA1, 0x01,
+		0x15, 0x00,
+		0x35, 0x00,
+		//0x26, 0xFF, 0x03,
+		0x26, 0xff, 0x0f,   // Trocando o logical max para se adequar ao ADC desse uC
+		//0x46, 0xFF, 0x03,
+		0x46, 0xff, 0x0f, // Trocando o physical max para manter coerencia com logical max
+		0x09, 0x30,
+		0x09, 0x31,
+		0x09, 0x32,
+		0x75, 0x10,
+		0x95, 0x03,
+		0x81, 0x02,
+		0x06, 0x00, 0xFF,
+		0x09, 0x20,
+		0x75, 0x08,
+		0x95, 0x25,
+		0x81, 0x02,
+		0x09, 0x21,
+		0x95, 0x20,
+		0x91, 0x02,
+		0xC0
+
+//	    0x05, 0x01,                    // USAGE_PAGE (Generic Desktop)
+//	    0x09, 0x04,                    // USAGE (Joystick)
+//	    0xa1, 0x01,                    // COLLECTION (Application)
+//	    0xa1, 0x00,                    //   COLLECTION (Physical)
+//	    0x09, 0x36,                    //     USAGE (Slider)
+//	    0x15, 0x00,                    //     LOGICAL_MINIMUM (0)
+//	    0x26, 0xff, 0x0f,              //     LOGICAL_MAXIMUM (4095)
+//	    0x35, 0x00,                    //     PHYSICAL_MINIMUM (0)
+//	    0x46, 0xff, 0x0f,              //     PHYSICAL_MAXIMUM (4095)
+//	    0x75, 0x0c,                    //     REPORT_SIZE (12)
+//	    0x95, 0x01,                    //     REPORT_COUNT (1)
+//	    0x81, 0x02,                    //     INPUT (Data,Var,Abs)
+//	    0x75, 0x04,                    //     REPORT_SIZE (4)
+//	    0x81, 0x01,                    //     INPUT (Cnst,Ary,Abs)
+//	    0x09, 0x36,                    //     USAGE (Slider)
+//	    0x75, 0x0c,                    //     REPORT_SIZE (12)
+//	    0x81, 0x02,                    //     INPUT (Data,Var,Abs)
+//	    0x75, 0x04,                    //     REPORT_SIZE (4)
+//	    0x81, 0x01,                    //     INPUT (Cnst,Ary,Abs)
+//	    0x09, 0x36,                    //     USAGE (Slider)
+//	    0x75, 0x0c,                    //     REPORT_SIZE (12)
+//	    0x81, 0x02,                    //     INPUT (Data,Var,Abs)
+//	    0x75, 0x04,                    //     REPORT_SIZE (4)
+//	    0x81, 0x01,                    //     INPUT (Cnst,Ary,Abs)
+//	    0xc0,                          //   END_COLLECTION
+//	    0x05, 0x09,                    //   USAGE_PAGE (Button)
+//	    0x15, 0x00,                    //   LOGICAL_MINIMUM (0)
+//	    0x25, 0x01,                    //   LOGICAL_MAXIMUM (1)
+//	    0x35, 0x00,                    //   PHYSICAL_MINIMUM (0)
+//	    0x45, 0x01,                    //   PHYSICAL_MAXIMUM (1)
+//	    0x19, 0x01,                    //   USAGE_MINIMUM (Button 1)
+//	    0x29, 0x28,                    //   USAGE_MAXIMUM (Button 40)
+//	    0x75, 0x01,                    //   REPORT_SIZE (1)
+//	    0x95, 0x28,                    //   REPORT_COUNT (40)
+//	    0x81, 0x02,                    //   INPUT (Data,Var,Abs)
 
 //		0x05, 0x01,                    // USAGE_PAGE (Generic Desktop)
 //	    0x09, 0x04,                    // USAGE (Joystick)
@@ -143,7 +170,7 @@ __ALIGN_BEGIN static uint8_t CUSTOM_HID_ReportDesc_FS[USBD_CUSTOM_HID_REPORT_DES
 //	    0x81, 0x02,                    //   INPUT (Data,Var,Abs)
 
   /* USER CODE END 0 */
-  0xC0    /*     END_COLLECTION	             */
+//  0xC0    /*     END_COLLECTION	             */
 };
 
 /* USER CODE BEGIN PRIVATE_VARIABLES */

@@ -63,13 +63,13 @@
   * @{
   */
 
-#define USBD_VID     1155
+#define USBD_VID     1103
 #define USBD_LANGID_STRING     1033
-#define USBD_MANUFACTURER_STRING     "Dirac Eng"
-#define USBD_PID_FS     22354
-#define USBD_PRODUCT_STRING_FS     "LRJoy Keypad"
-#define USBD_CONFIGURATION_STRING_FS     "Custom HID Config"
-#define USBD_INTERFACE_STRING_FS     "Custom HID Interface"
+#define USBD_MANUFACTURER_STRING     "Thrustmaster"
+#define USBD_PID_FS     46713
+#define USBD_PRODUCT_STRING_FS     "T-Rudder"
+#define USBD_CONFIGURATION_STRING_FS     ""
+#define USBD_INTERFACE_STRING_FS     ""
 
 /* USER CODE BEGIN PRIVATE_DEFINES */
 
@@ -95,19 +95,18 @@
 /**
   * @}
   */
-  
+
 /** @defgroup USBD_DESC_Private_FunctionPrototypes USBD_DESC_Private_FunctionPrototypes
   * @brief Private functions declaration.
   * @{
   */
-  
+
 static void Get_SerialNum(void);
 static void IntToUnicode(uint32_t value, uint8_t * pbuf, uint8_t len);
-  
+
 /**
   * @}
-  */  
-  
+  */
 
 /** @defgroup USBD_DESC_Private_FunctionPrototypes USBD_DESC_Private_FunctionPrototypes
   * @brief Private functions declaration for FS.
@@ -199,7 +198,7 @@ __ALIGN_BEGIN uint8_t USBD_LangIDDesc[USB_LEN_LANGID_STR_DESC] __ALIGN_END =
 __ALIGN_BEGIN uint8_t USBD_StrDesc[USBD_MAX_STR_DESC_SIZ] __ALIGN_END;
 
 #if defined ( __ICCARM__ ) /*!< IAR Compiler */
-  #pragma data_alignment=4   
+  #pragma data_alignment=4
 #endif
 __ALIGN_BEGIN uint8_t USBD_StringSerial[USB_SIZ_STRING_SERIAL] __ALIGN_END = {
   USB_SIZ_STRING_SERIAL,
@@ -332,8 +331,8 @@ uint8_t * USBD_FS_InterfaceStrDescriptor(USBD_SpeedTypeDef speed, uint16_t *leng
 }
 
 /**
-  * @brief  Create the serial number string descriptor 
-  * @param  None 
+  * @brief  Create the serial number string descriptor
+  * @param  None
   * @retval None
   */
 static void Get_SerialNum(void)
@@ -354,9 +353,9 @@ static void Get_SerialNum(void)
 }
 
 /**
-  * @brief  Convert Hex 32Bits value into char 
+  * @brief  Convert Hex 32Bits value into char
   * @param  value: value to convert
-  * @param  pbuf: pointer to the buffer 
+  * @param  pbuf: pointer to the buffer
   * @param  len: buffer length
   * @retval None
   */

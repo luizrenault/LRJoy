@@ -111,99 +111,53 @@ int main(void)
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
 
-  uint16_t axis[3]={0,0,0};
+  volatile uint16_t axis[3]={0xffff,0xffff,0xffff};
+  uint16_t axis_ref[3]={0,0,0};
+  uint16_t axis_min[3]={4096,4096,4096};
+  uint16_t axis_max[3]={0,0,0};
+  uint16_t zcenter=2047;
 
 	typedef struct __attribute__((__packed__)){
 		uint16_t x;
 		uint16_t y;
 		uint16_t z;
-		uint32_t buttons;
-		uint8_t buttons2;
+		uint8_t dummy[37];
 	} LRJoyReport;
+	//RUDDER HID Report Descriptor envia (inputs) 3 reports de 16 bits (x, y e z) e depois 37 reports de 8 bits
 
 	LRJoyReport report;
-	report.buttons=0;
-	HAL_ADC_Start_DMA(&hadc1, (uint32_t*)&axis, 2);
+	//report.buttons=0;
+	HAL_ADC_Start_DMA(&hadc1, (uint32_t*)&axis, 3);
 	HAL_TIM_Encoder_Start(&htim1, TIM_CHANNEL_ALL);
 	HAL_TIM_Encoder_Start(&htim2, TIM_CHANNEL_ALL);
 	HAL_TIM_Encoder_Start(&htim3, TIM_CHANNEL_ALL);
 
-	uint8_t updown=0;
-	int16_t encoder[3]={0,0,0};
-	int16_t encodert[3]={0,0,0};
+	while(axis[0]==0xffff || axis[1]==0xffff || axis[2]==0xffff);
 
 	while (1)
 	{
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-		uint32_t buttons=0;
-		HAL_GPIO_WritePin(C1_GPIO_Port, C1_Pin, GPIO_PIN_RESET);
-		HAL_Delay(1);
-		buttons=(buttons & 0xffffff00) | (~GPIOA->IDR & 0xff);
-		HAL_GPIO_WritePin(C1_GPIO_Port, C1_Pin, GPIO_PIN_SET);
 
-		HAL_GPIO_WritePin(C2_GPIO_Port, C2_Pin, GPIO_PIN_RESET);
-		HAL_Delay(1);
-		buttons=(buttons & 0xffff00ff) | (~GPIOA->IDR & 0xff)<<8;
-		HAL_GPIO_WritePin(C2_GPIO_Port, C2_Pin, GPIO_PIN_SET);
-
-		HAL_GPIO_WritePin(C3_GPIO_Port, C3_Pin, GPIO_PIN_RESET);
-		HAL_Delay(1);
-		buttons=(buttons & 0xff00ffff) | (~GPIOA->IDR & 0xff)<<16;
-		HAL_GPIO_WritePin(C3_GPIO_Port, C3_Pin, GPIO_PIN_SET);
-
-		HAL_GPIO_WritePin(C4_GPIO_Port, C4_Pin, GPIO_PIN_RESET);
-		HAL_Delay(1);
-		buttons=(buttons & 0x00ffffff) | (~GPIOA->IDR & 0xff)<<24;
-		HAL_GPIO_WritePin(C4_GPIO_Port, C4_Pin, GPIO_PIN_SET);
-
-		HAL_GPIO_WritePin(C5_GPIO_Port, C5_Pin, GPIO_PIN_RESET);
-		HAL_Delay(1);
-		report.buttons2=(report.buttons2 & 0xfc) | (~GPIOA->IDR & 0x03);
-		HAL_GPIO_WritePin(C5_GPIO_Port, C5_Pin, GPIO_PIN_SET);
-
-		report.x=axis[0];
-		report.y=axis[1];
-		report.z=axis[2];
-
-		encodert[0]=TIM1->CNT;
-		encodert[1]=TIM2->CNT;
-		encodert[2]=TIM3->CNT;
+	axis_ref[0]=axis[0];
+	if (axis_ref[0]<axis_min[0]) axis_min[0]=axis_ref[0];
+	if (axis_ref[0]>axis_max[0]) axis_max[0]=axis_ref[0];
+	report.x=(axis_ref[0]-axis_min[0])*4095/(axis_max[0]-axis_min[0]);
 
 
-		if(updown==0){
-			for(uint8_t i=0;i<3;i++){
-				if(encoder[i]-encodert[i]>0){
-					report.buttons2 |= (1<<(i*2+2));
-					encoder[i]--;
-				} else if(encoder[i]-encodert[i]<0){
-					report.buttons2 |= (1<<(i*2+3));
-					encoder[i]++;
-				}
-			}
-		} else if(updown==3){
-			report.buttons2 &= 0x03;
-		}
-		updown++;
-		updown=updown%6;
+	axis_ref[1]=axis[1];
+	if (axis_ref[1]<axis_min[1]) axis_min[1]=axis_ref[1];
+	if (axis_ref[1]>axis_max[1]) axis_max[1]=axis_ref[1];
+	report.y=(axis_ref[1]-axis_min[1])*4095/(axis_max[1]-axis_min[1]);
 
-		report.buttons=0;
-		static const uint8_t mapping[32]={
-				26, 18, 10, 27, 19, 11, 28, 20,
-				12, 21, 29, 13,  1,  2,  3,  4,
-				 5, 25, 17,  9, 32, 30, 22, 14,
-				15, 23, 31,  6, 24, 16,  8,  7
-		};
-		for(uint8_t i=0;i<32;i++){
-			if(buttons & (1<<(mapping[i]-1))){
-				report.buttons|=(1<<i);
-			}
-		}
+	axis_ref[2]=axis[2];
+	if (axis_ref[2]<axis_min[2]) axis_min[2]=axis_ref[2];
+	if (axis_ref[2]>axis_max[2]) axis_max[2]=axis_ref[2];
+	report.z=(axis_ref[2]-axis_min[2])*4095/(axis_max[2]-axis_min[2]);
 
-
-		USBD_CUSTOM_HID_SendReport_FS(&report, sizeof(report));
-		HAL_Delay(10);
+	USBD_CUSTOM_HID_SendReport_FS(&report, sizeof(report));
+	HAL_Delay(10);
 	}
   /* USER CODE END 3 */
 }
@@ -218,7 +172,7 @@ void SystemClock_Config(void)
   RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
   RCC_PeriphCLKInitTypeDef PeriphClkInit = {0};
 
-  /** Initializes the CPU, AHB and APB busses clocks 
+  /** Initializes the CPU, AHB and APB busses clocks
   */
   RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
   RCC_OscInitStruct.HSEState = RCC_HSE_ON;
@@ -231,7 +185,7 @@ void SystemClock_Config(void)
   {
     Error_Handler();
   }
-  /** Initializes the CPU, AHB and APB busses clocks 
+  /** Initializes the CPU, AHB and APB busses clocks
   */
   RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
                               |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
@@ -270,7 +224,7 @@ static void MX_ADC1_Init(void)
   /* USER CODE BEGIN ADC1_Init 1 */
 
   /* USER CODE END ADC1_Init 1 */
-  /** Common config 
+  /** Common config
   */
   hadc1.Instance = ADC1;
   hadc1.Init.ScanConvMode = ADC_SCAN_ENABLE;
@@ -278,24 +232,32 @@ static void MX_ADC1_Init(void)
   hadc1.Init.DiscontinuousConvMode = DISABLE;
   hadc1.Init.ExternalTrigConv = ADC_SOFTWARE_START;
   hadc1.Init.DataAlign = ADC_DATAALIGN_RIGHT;
-  hadc1.Init.NbrOfConversion = 2;
+  hadc1.Init.NbrOfConversion = 3;
   if (HAL_ADC_Init(&hadc1) != HAL_OK)
   {
     Error_Handler();
   }
-  /** Configure Regular Channel 
+  /** Configure Regular Channel
   */
-  sConfig.Channel = ADC_CHANNEL_8;
+  sConfig.Channel = ADC_CHANNEL_7;
   sConfig.Rank = ADC_REGULAR_RANK_1;
   sConfig.SamplingTime = ADC_SAMPLETIME_71CYCLES_5;
   if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
   {
     Error_Handler();
   }
-  /** Configure Regular Channel 
+  /** Configure Regular Channel
+  */
+  sConfig.Channel = ADC_CHANNEL_8;
+  sConfig.Rank = ADC_REGULAR_RANK_2;
+  if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /** Configure Regular Channel
   */
   sConfig.Channel = ADC_CHANNEL_9;
-  sConfig.Rank = ADC_REGULAR_RANK_2;
+  sConfig.Rank = ADC_REGULAR_RANK_3;
   if (HAL_ADC_ConfigChannel(&hadc1, &sConfig) != HAL_OK)
   {
     Error_Handler();
@@ -454,10 +416,10 @@ static void MX_TIM3_Init(void)
 
 }
 
-/** 
+/**
   * Enable DMA controller clock
   */
-static void MX_DMA_Init(void) 
+static void MX_DMA_Init(void)
 {
 
   /* DMA controller clock enable */
@@ -501,10 +463,10 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(LED_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : L1_Pin L2_Pin L3_Pin L4_Pin 
-                           L5_Pin L6_Pin L7_Pin L8_Pin */
-  GPIO_InitStruct.Pin = L1_Pin|L2_Pin|L3_Pin|L4_Pin 
-                          |L5_Pin|L6_Pin|L7_Pin|L8_Pin;
+  /*Configure GPIO pins : L1_Pin L2_Pin L3_Pin L4_Pin
+                           L5_Pin L6_Pin L7_Pin */
+  GPIO_InitStruct.Pin = L1_Pin|L2_Pin|L3_Pin|L4_Pin
+                          |L5_Pin|L6_Pin|L7_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
@@ -550,7 +512,7 @@ void Error_Handler(void)
   * @retval None
   */
 void assert_failed(uint8_t *file, uint32_t line)
-{ 
+{
   /* USER CODE BEGIN 6 */
 	/* User can add his own implementation to report the file name and line number,
      tex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */

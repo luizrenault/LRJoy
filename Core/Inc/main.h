@@ -74,8 +74,6 @@ void Error_Handler(void);
 #define L6_GPIO_Port GPIOA
 #define L7_Pin GPIO_PIN_6
 #define L7_GPIO_Port GPIOA
-#define L8_Pin GPIO_PIN_7
-#define L8_GPIO_Port GPIOA
 #define ENC3A_Pin GPIO_PIN_8
 #define ENC3A_GPIO_Port GPIOA
 #define ENC3B_Pin GPIO_PIN_9
