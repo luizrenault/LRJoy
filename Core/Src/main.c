@@ -17,7 +17,6 @@
  ******************************************************************************
  */
 /* USER CODE END Header */
-
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "usb_device.h"
@@ -118,7 +117,7 @@ int main(void)
 		uint16_t y;
 		uint16_t z;
 		uint32_t buttons;
-		uint8_t buttons2;
+		uint16_t buttons2;
 	} LRJoyReport;
 
 	LRJoyReport report;
@@ -138,6 +137,8 @@ int main(void)
 
     /* USER CODE BEGIN 3 */
 		uint32_t buttons=0;
+
+
 		HAL_GPIO_WritePin(C1_GPIO_Port, C1_Pin, GPIO_PIN_RESET);
 		HAL_Delay(1);
 		buttons=(buttons & 0xffffff00) | (~GPIOA->IDR & 0xff);
@@ -160,7 +161,7 @@ int main(void)
 
 		HAL_GPIO_WritePin(C5_GPIO_Port, C5_Pin, GPIO_PIN_RESET);
 		HAL_Delay(1);
-		report.buttons2=(report.buttons2 & 0xfc) | (~GPIOA->IDR & 0x03);
+		report.buttons2=(report.buttons2 & 0xff00) | (~GPIOA->IDR & 0xff);
 		HAL_GPIO_WritePin(C5_GPIO_Port, C5_Pin, GPIO_PIN_SET);
 
 		report.x=axis[0];
@@ -175,15 +176,15 @@ int main(void)
 		if(updown==0){
 			for(uint8_t i=0;i<3;i++){
 				if(encoder[i]-encodert[i]>0){
-					report.buttons2 |= (1<<(i*2+2));
+					report.buttons2 |= (1<<(i*2+8));
 					encoder[i]--;
 				} else if(encoder[i]-encodert[i]<0){
-					report.buttons2 |= (1<<(i*2+3));
+					report.buttons2 |= (1<<(i*2+9));
 					encoder[i]++;
 				}
 			}
 		} else if(updown==3){
-			report.buttons2 &= 0x03;
+			report.buttons2 &= 0x00ff;
 		}
 		updown++;
 		updown=updown%6;
@@ -218,7 +219,8 @@ void SystemClock_Config(void)
   RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
   RCC_PeriphCLKInitTypeDef PeriphClkInit = {0};
 
-  /** Initializes the CPU, AHB and APB busses clocks 
+  /** Initializes the RCC Oscillators according to the specified parameters
+  * in the RCC_OscInitTypeDef structure.
   */
   RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
   RCC_OscInitStruct.HSEState = RCC_HSE_ON;
@@ -231,7 +233,7 @@ void SystemClock_Config(void)
   {
     Error_Handler();
   }
-  /** Initializes the CPU, AHB and APB busses clocks 
+  /** Initializes the CPU, AHB and APB buses clocks
   */
   RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
                               |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
@@ -270,7 +272,7 @@ static void MX_ADC1_Init(void)
   /* USER CODE BEGIN ADC1_Init 1 */
 
   /* USER CODE END ADC1_Init 1 */
-  /** Common config 
+  /** Common config
   */
   hadc1.Instance = ADC1;
   hadc1.Init.ScanConvMode = ADC_SCAN_ENABLE;
@@ -283,7 +285,7 @@ static void MX_ADC1_Init(void)
   {
     Error_Handler();
   }
-  /** Configure Regular Channel 
+  /** Configure Regular Channel
   */
   sConfig.Channel = ADC_CHANNEL_8;
   sConfig.Rank = ADC_REGULAR_RANK_1;
@@ -292,7 +294,7 @@ static void MX_ADC1_Init(void)
   {
     Error_Handler();
   }
-  /** Configure Regular Channel 
+  /** Configure Regular Channel
   */
   sConfig.Channel = ADC_CHANNEL_9;
   sConfig.Rank = ADC_REGULAR_RANK_2;
@@ -454,10 +456,10 @@ static void MX_TIM3_Init(void)
 
 }
 
-/** 
+/**
   * Enable DMA controller clock
   */
-static void MX_DMA_Init(void) 
+static void MX_DMA_Init(void)
 {
 
   /* DMA controller clock enable */
@@ -489,10 +491,11 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(LED_GPIO_Port, LED_Pin, GPIO_PIN_SET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(C5_GPIO_Port, C5_Pin, GPIO_PIN_SET);
+  HAL_GPIO_WritePin(GPIOB, C6_Pin|C1_Pin|C2_Pin|C3_Pin
+                          |C4_Pin, GPIO_PIN_SET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOB, C1_Pin|C2_Pin|C3_Pin|C4_Pin, GPIO_PIN_SET);
+  HAL_GPIO_WritePin(C5_GPIO_Port, C5_Pin, GPIO_PIN_SET);
 
   /*Configure GPIO pin : LED_Pin */
   GPIO_InitStruct.Pin = LED_Pin;
@@ -501,13 +504,22 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(LED_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : L1_Pin L2_Pin L3_Pin L4_Pin 
+  /*Configure GPIO pins : L1_Pin L2_Pin L3_Pin L4_Pin
                            L5_Pin L6_Pin L7_Pin L8_Pin */
-  GPIO_InitStruct.Pin = L1_Pin|L2_Pin|L3_Pin|L4_Pin 
+  GPIO_InitStruct.Pin = L1_Pin|L2_Pin|L3_Pin|L4_Pin
                           |L5_Pin|L6_Pin|L7_Pin|L8_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : C6_Pin C1_Pin C2_Pin C3_Pin
+                           C4_Pin */
+  GPIO_InitStruct.Pin = C6_Pin|C1_Pin|C2_Pin|C3_Pin
+                          |C4_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_OD;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
   /*Configure GPIO pin : C5_Pin */
   GPIO_InitStruct.Pin = C5_Pin;
@@ -515,13 +527,6 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(C5_GPIO_Port, &GPIO_InitStruct);
-
-  /*Configure GPIO pins : C1_Pin C2_Pin C3_Pin C4_Pin */
-  GPIO_InitStruct.Pin = C1_Pin|C2_Pin|C3_Pin|C4_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_OD;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
 }
 
@@ -550,7 +555,7 @@ void Error_Handler(void)
   * @retval None
   */
 void assert_failed(uint8_t *file, uint32_t line)
-{ 
+{
   /* USER CODE BEGIN 6 */
 	/* User can add his own implementation to report the file name and line number,
      tex: printf("Wrong parameters value: file %s on line %d\r\n", file, line) */

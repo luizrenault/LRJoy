@@ -79,7 +79,7 @@ void MX_USB_DEVICE_Init(void)
   HAL_GPIO_WritePin(GPIOA, GPIO_PIN_12|GPIO_PIN_11, GPIO_PIN_SET);
   
   /* USER CODE END USB_DEVICE_Init_PreTreatment */
-  
+
   /* Init Device Library, add supported class and start the library. */
   if (USBD_Init(&hUsbDeviceFS, &FS_Desc, DEVICE_FS) != USBD_OK)
   {
